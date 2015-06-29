@@ -1,0 +1,5 @@
+name: Color Picker
+version: 1.0
+author: Nogtail
+main: com.koubal.colorpicker.ColorPicker
+depend: [ProtocolLib]
