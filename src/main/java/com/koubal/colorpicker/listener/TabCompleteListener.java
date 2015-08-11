@@ -1,9 +1,11 @@
-package com.koubal.colorpicker;
+package com.koubal.colorpicker.listener;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
+import com.koubal.colorpicker.ColorPicker;
+import com.koubal.colorpicker.Util;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.chat.ComponentSerializer;
 import org.apache.commons.lang.WordUtils;
@@ -26,11 +28,15 @@ public class TabCompleteListener extends PacketAdapter {
 		PacketContainer packet = event.getPacket();
 		String text = packet.getStrings().read(0);
 		char character = text.charAt(text.length() - 1);
+		boolean preview = true;
 
 		for (char colorCharacter : ColorPicker.getColorCharacters()) {
 			if (colorCharacter != character) {
+				preview = false;
 				continue;
 			}
+
+			preview = preview && player.hasPermission("colorpicker.preview");
 
 			ChatColor[] colors = ChatColor.values();
 			TextComponent messages = new TextComponent("");
@@ -51,13 +57,23 @@ public class TabCompleteListener extends PacketAdapter {
 				applyFormatting(hoverText, color);
 				message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new BaseComponent[]{hoverText}));
 
-				message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, text + color.getChar()));
+				String clickMessage = text;
+
+				if (preview) {
+					clickMessage = text.substring(0, text.length() - 1) + ChatColor.COLOR_CHAR;
+				}
+
+				message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, clickMessage + color.getChar()));
+
+				message.setInsertion((ColorPicker.isPrependInsert() ? character : "") + "" + color.getChar());
 
 				messages.addExtra(message);
 				messages.addExtra(" ");
 			}
 
-			Util.sendRaw(player, ComponentSerializer.toString(messages));
+			String serialisedMessage = ComponentSerializer.toString(messages);
+			System.out.println(serialisedMessage);
+			Util.sendRaw(player, serialisedMessage);
 			break;
 		}
 	}
@@ -73,7 +89,7 @@ public class TabCompleteListener extends PacketAdapter {
 				case ITALIC: component.setItalic(true); break;
 			}
 
-			component.setColor(net.md_5.bungee.api.ChatColor.WHITE);
+			//component.setColor(net.md_5.bungee.api.ChatColor.WHITE);
 		}
 	}
 }

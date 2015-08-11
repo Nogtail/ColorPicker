@@ -1,2 +1,6 @@
+# If the color character should be prepended on insert (shift + click)
+prepend-insert: true
+
+# A list of characters to be used as color characters, the first one is used for preview if the player has permission
 characters:
   - "&"
